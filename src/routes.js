@@ -9,7 +9,7 @@ export default function Routing() {
 		<BrowserRouter>
 			<Routes>
 				<Route path="/" element={<Main />} />
-				<Route path="/repository" element={<Repository />} />
+				<Route path="/repository/:repository" element={<Repository />} />
 			</Routes>
 		</BrowserRouter>
 	);

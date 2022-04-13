@@ -1,9 +1,17 @@
-import { Title } from './styles';
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+
+import { Container } from './styles';
+import api from '../../services/api';
 
 export default function Repository() {
+	const { repository } = useParams();
+
+	console.log(repository);
+
 	return (
-		<div>
-			<Title>Repository</Title>
-		</div>
+		<Container>
+			<h1>{repository}</h1>
+		</Container>
 	);
 }
