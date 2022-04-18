@@ -9,6 +9,7 @@ import {
 	Owner,
 	IssuesList,
 	PageActions,
+	FiltersList,
 } from './styles';
 import api from '../../services/api';
 
@@ -19,6 +20,12 @@ export default function Repository() {
 	const [issues, setIssues] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [page, setPage] = useState(1);
+	const [filters, setFilters] = useState([
+		{ state: 'all', label: 'All', active: true },
+		{ state: 'open', label: 'Open', active: false },
+		{ state: 'closed', label: 'Closed', active: false },
+	]);
+	const [filterIndex, setFilterIndex] = useState(0);
 
 	useEffect(() => {
 		async function load() {
@@ -26,7 +33,7 @@ export default function Repository() {
 				api.get(`/repos/${repository}`),
 				api.get(`/repos/${repository}/issues`, {
 					params: {
-						state: 'open',
+						state: filters.find((f) => f.active).state,
 						per_page: 5,
 					},
 				}),
@@ -44,7 +51,7 @@ export default function Repository() {
 		async function loadIssue() {
 			const response = await api.get(`/repos/${repository}/issues`, {
 				params: {
-					state: 'open',
+					state: filters[filterIndex].state,
 					page: page,
 					per_page: 5,
 				},
@@ -54,10 +61,14 @@ export default function Repository() {
 		}
 
 		loadIssue();
-	}, [page, repository]);
+	}, [page, repository, filters, filterIndex]);
 
 	function handlePage(action) {
 		setPage(action === 'back' ? page - 1 : page + 1);
+	}
+
+	function handleFilter(index) {
+		setFilterIndex(index);
 	}
 
 	if (loading) {
@@ -79,6 +90,18 @@ export default function Repository() {
 				<p>{repo.description}</p>
 			</Owner>
 
+			<FiltersList active={filterIndex}>
+				{filters.map((filter, index) => (
+					<button
+						type="button"
+						key={filter.label}
+						onClick={() => handleFilter(index)}
+					>
+						{filter.label}
+					</button>
+				))}
+			</FiltersList>
+
 			<IssuesList>
 				{issues.map((issue) => (
 					<li key={issue.id}>
@@ -98,7 +121,11 @@ export default function Repository() {
 			</IssuesList>
 
 			<PageActions>
-				<button type="button" onClick={() => handlePage('back')} disabled={page < 2}>
+				<button
+					type="button"
+					onClick={() => handlePage('back')}
+					disabled={page < 2}
+				>
 					Back
 				</button>
 				<button type="button" onClick={() => handlePage('next')}>
